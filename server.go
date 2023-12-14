@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"sahabatrental.com/stock_movement/v2/modules/stock_movement"
+	"sahabatrental.com/stock_movement/v2/utils"
 	"time"
 )
 
@@ -17,6 +18,9 @@ func main() {
 	viper.SetDefault("APP_PORT", "3000")
 	viper.SetDefault("TRUSTED_PROXIES", []string{"127.0.0.1"})
 
+	// configure viper default env settings
+	utils.Database.Configure()
+
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("where is the config file huh? pass it! %w", err))
 	}
@@ -24,6 +28,16 @@ func main() {
 	if viper.GetString("APP_KEY") == "" {
 		panic("APP_KEY must be passed!")
 	}
+
+	// connect to database
+	utils.Database.Connect(
+		viper.GetString("DB_USER"),
+		viper.GetString("DB_PASS"),
+		viper.GetString("DB_HOST"),
+		viper.GetString("DB_PORT"),
+		viper.GetString("DB_NAME"),
+		viper.GetString("DB_CHARSET"),
+	)
 
 	r := gin.Default()
 

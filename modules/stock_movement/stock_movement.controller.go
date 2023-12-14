@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"net/http"
+	"sahabatrental.com/stock_movement/v2/modules/stock_movement/models"
 	"sahabatrental.com/stock_movement/v2/utils"
 )
 
@@ -28,7 +29,16 @@ func Create(c *gin.Context) {
 		return
 	}
 
+	var stockMovements []models.StockRestoration
+
+	result := utils.Database.Gorm.Preload("StockMovement").Preload("NewStockMovement").Find(&stockMovements)
+
+	if result.Error != nil {
+		print(result.Error.Error())
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Stock movement created!",
+		"data":    stockMovements,
 	})
 }
