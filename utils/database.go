@@ -12,6 +12,7 @@ type DB struct {
 }
 
 var Database = DB{}
+var Gorm = Database.Gorm
 
 func (db *DB) Configure() {
 	viper.SetDefault("DB_HOST", "127.0.0.1")
