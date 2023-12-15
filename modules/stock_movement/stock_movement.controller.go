@@ -10,6 +10,7 @@ import (
 	"sahabatrental.com/stock_movement/v2/modules/stock_movement/client"
 	"sahabatrental.com/stock_movement/v2/modules/stock_movement/models"
 	"sahabatrental.com/stock_movement/v2/utils"
+	"time"
 )
 
 func Create(c *gin.Context) {
@@ -58,6 +59,7 @@ func Create(c *gin.Context) {
 				SourceStock: earning.CarColor.RealStock,
 				ToStock:     earning.CarColor.RealStock - int(earning.Qty),
 				Desc:        json.Desc,
+				MovedAt:     time.Now(),
 			}
 
 			if result := utils.Gorm.Create(&stockMovement); result.Error != nil {
@@ -85,5 +87,6 @@ func Create(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Stock movement Processed!",
+		"status":  "ok",
 	})
 }
