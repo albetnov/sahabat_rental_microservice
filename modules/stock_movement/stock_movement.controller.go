@@ -5,7 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
+	"log"
 	"net/http"
+	"sahabatrental.com/stock_movement/v2/modules/stock_movement/client"
 	"sahabatrental.com/stock_movement/v2/modules/stock_movement/models"
 	"sahabatrental.com/stock_movement/v2/utils"
 )
@@ -32,7 +34,7 @@ func Create(c *gin.Context) {
 
 	earning := models.Earning{}
 
-	if result := utils.Gorm.Preload("CarColor").Where("id = ?", json.EarningId).First(&earning); result.Error != nil {
+	if result := utils.Gorm.Preload("CarColor").Where("id = ?", json.EarningId).First(&earning); result == nil || result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"message": "Earning ID not found!",
@@ -41,12 +43,20 @@ func Create(c *gin.Context) {
 		}
 	}
 
+	if earning.StockMovementId != 0 {
+		c.JSON(http.StatusConflict, gin.H{
+			"message": "This earning already have stock movement!",
+		})
+
+		return
+	}
+
 	go func() {
 		err := utils.Gorm.Transaction(func(tx *gorm.DB) error {
 			stockMovement := models.StockMovement{
-				CarColorId:  earning.CarColorId,
+				CarColorId:  earning.CarColorsId,
 				SourceStock: earning.CarColor.RealStock,
-				ToStock:     earning.CarColor.RealStock - earning.Qty,
+				ToStock:     earning.CarColor.RealStock - int(earning.Qty),
 				Desc:        json.Desc,
 			}
 
@@ -56,7 +66,7 @@ func Create(c *gin.Context) {
 
 			stockRestoration := models.StockRestoration{
 				StockMovementId: stockMovement.ID,
-				ScheduledAt:     json.ReturnedAt,
+				ScheduledAt:     earning.ReturnedAt,
 				Status:          "pending",
 				SourceModule:    "all.navigation.earning",
 			}
@@ -65,11 +75,11 @@ func Create(c *gin.Context) {
 				return result.Error
 			}
 
-			return nil
+			return client.NotifyStockCreated(stockMovement, earning)
 		})
 
 		if err != nil {
-			// fire webhook
+			log.Fatal(err.Error())
 		}
 	}()
 

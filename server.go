@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"sahabatrental.com/stock_movement/v2/modules/stock_movement"
 	"sahabatrental.com/stock_movement/v2/utils"
-	"time"
 )
 
 func main() {
@@ -49,18 +48,8 @@ func main() {
 	}
 
 	r.GET("/health", func(c *gin.Context) {
-		result, err := time.Parse("02-01-2006", "01-01-2023")
-
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"err": err.Error(),
-			})
-			return
-		}
-
 		c.JSON(http.StatusOK, gin.H{
 			"message": "ok",
-			"time":    result,
 		})
 	})
 

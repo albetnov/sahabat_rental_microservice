@@ -3,10 +3,10 @@ package models
 import "time"
 
 type Earning struct {
-	Id              uint
+	ID              uint `gorm:"primaryKey"`
 	Code            string
-	CarColorId      uint
-	CarColor        CarColor
+	CarColorsId     uint
+	CarColor        CarColor `gorm:"foreignKey:CarColorsId"`
 	CustomerId      uint
 	StockMovementId uint
 	StockMovement   StockMovement

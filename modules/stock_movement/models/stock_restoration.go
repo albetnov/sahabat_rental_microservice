@@ -5,7 +5,7 @@ import (
 )
 
 type StockRestoration struct {
-	Id                 uint
+	ID                 uint `gorm:"primaryKey"`
 	StockMovementId    uint
 	StockMovement      StockMovement
 	NewStockMovementId uint

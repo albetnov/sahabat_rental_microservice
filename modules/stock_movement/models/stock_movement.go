@@ -8,8 +8,8 @@ import (
 type StockMovement struct {
 	gorm.Model
 	CarColorId  uint
-	SourceStock uint
-	ToStock     uint
+	SourceStock int
+	ToStock     int
 	Desc        string
 	MovedAt     time.Time
 }

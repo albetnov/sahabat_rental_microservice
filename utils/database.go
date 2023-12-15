@@ -12,7 +12,7 @@ type DB struct {
 }
 
 var Database = DB{}
-var Gorm = Database.Gorm
+var Gorm *gorm.DB
 
 func (db *DB) Configure() {
 	viper.SetDefault("DB_HOST", "127.0.0.1")
@@ -41,6 +41,7 @@ func (db *DB) Connect(
 	var err error
 
 	db.Gorm, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	Gorm = db.Gorm
 
 	if err != nil {
 		panic("Failed to connect to database!")
